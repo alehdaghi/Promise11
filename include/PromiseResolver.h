@@ -6,7 +6,7 @@
 #define PROMISEC11_PROMISERESOLVER_H
 
 
-#include "promise.h"
+#include "Promise.h"
 
 template<typename T> class Promise;
 

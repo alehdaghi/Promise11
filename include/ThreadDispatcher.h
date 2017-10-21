@@ -8,7 +8,7 @@
 
 
 #include <stack>
-#include "../AsyncDispatcher.h"
+#include "AsyncDispatcher.h"
 
 class ThreadDispatcher {
     static std::stack<std::shared_ptr<SimpleDispatcher>> dispatchers;
