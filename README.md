@@ -203,7 +203,7 @@ int main() {
 
 ```
 and its result is:
-<code>
+```
   task3
 hi !!!!
 then 9, a: 100
@@ -221,4 +221,4 @@ then 7, a: 8
 chain1: 8
 task3
 then 8, a: 8
-  </code>
+ ```
