@@ -140,6 +140,11 @@ int main() {
     })->flatMap<std::string>([](int a){
         std::cout<<"flatMap 2: "<<a<<std::endl;
         return tempTask3(a);
+    })->after([](std::shared_ptr<std::string> res, std::shared_ptr<std::exception> ex){
+        if (res != nullptr)
+            std::cout<<"after 1, result: "<<*res<<std::endl;
+        else
+            std::cout<<"after 1, error: "<<ex->what()<<std::endl;
     })->then([](std::string res){
         std::cout<<"then 10, a: "<<res<<std::endl;
     });

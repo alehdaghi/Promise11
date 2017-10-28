@@ -23,6 +23,7 @@ class Promise {
     std::recursive_mutex                       mutex;
 
 public:
+    using Result_ptr = std::shared_ptr<T>;
     using Exception = std::shared_ptr<std::exception>;
     using PromiseFunc = std::function<void (PromiseResolver<T>)>;
 
@@ -30,7 +31,9 @@ public:
     using weak_ptr = std::weak_ptr<Promise<T>>;
 
     using OnResult = std::function<void(const T&)>;
-    using OnError =  std::function<void(Exception)>;
+    using OnError  = std::function<void(Exception)>;
+    using OnAfter  = std::function<void(Result_ptr, Exception)>;
+
     template<typename R>
     using Function = std::function<R(const T&)>;
 
@@ -414,7 +417,18 @@ public:
         }, "returnedPromise_"+name);
 
         return p;
+    }
 
+    /**
+    * Called after success or failure
+    *
+    * @param afterHandler after handler
+    * @return this
+    */
+    shared_ptr after(OnAfter afterHandler) {
+        return then([afterHandler](const T& t){afterHandler(std::make_shared<T>(t), nullptr);})
+                ->
+        failure([afterHandler](Exception ex){afterHandler(nullptr, ex);});
     }
 
 };
