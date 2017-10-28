@@ -33,6 +33,9 @@ public:
     using OnResult = std::function<void(const T&)>;
     using OnError  = std::function<void(Exception)>;
     using OnAfter  = std::function<void(Result_ptr, Exception)>;
+    using OnVoid = std::function<void()>;
+
+    using Supplier = std::function<shared_ptr(void)>;
 
     template<typename R>
     using Function = std::function<R(const T&)>;
@@ -308,6 +311,12 @@ public:
         }
     }
 
+    shared_ptr then(const OnVoid onVoid) {
+        then([onVoid](const T&){
+           onVoid();
+        });
+
+    }
     /**
     * Mapping result value of promise to another value
     *
@@ -431,6 +440,25 @@ public:
         failure([afterHandler](Exception ex){afterHandler(nullptr, ex);});
     }
 
+
+    using Void = std::shared_ptr<void>;
+    /**
+     * Execute promises step by step
+     *
+     * @param queue queue of promises
+     * @param <T>   type of promises
+     * @return promise
+     */
+    static std::shared_ptr<Promise<Void>> traverse(std::vector<Supplier> queue, int index = 0) {
+
+        if (queue.size() == 0 || index == queue.size()) {
+            return Promise<Void >::success(nullptr);
+        }
+        auto p = queue[index];
+        return p()->flatMap<Void>([queue, index](T a){
+            return traverse(queue, index+1);
+        });
+    }
 };
 
 
