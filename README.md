@@ -43,6 +43,58 @@ p2->then([](string result){
 
 
 ```
+##### Traversing of a list of promises
+```C++
+std::shared_ptr<Promise<std::string>> tempTask3(int a) {// do syncTask1 async
+// doing a task async and returning promise
+
+    return Promise<std::string>::createPromise(
+            [a](PromiseResolver<std::string> pr) {
+                dispatcher->dispatch([&, pr, a]
+                                     {
+                                         auto resolver = const_cast<PromiseResolver<std::string>&> (pr);
+                                         try {
+                                             std::string s = syncTask1(a);
+                                             resolver.result(s);
+                                         }
+                                         catch (std::exception ex)
+                                         {
+                                             resolver.tryError(std::make_shared<std::exception >(ex));
+                                         }
+                                     }
+                );
+            }, "asyncTaskPromise1");
+}
+/**
+**
+..
+**/
+
+    std::cout<<"hello "<<std::endl;
+    std::vector<Promise<std::string>::Supplier> list;
+    for (int i=0;i<4;i++)
+    {
+        list.push_back([i](){
+            return tempTask3(i)->then([i](std::string a){
+                std::cout<<"binary of "<<i<<" is: "<<a<<std::endl;
+        });
+        });
+    }
+    Promise<std::string>::traverse(list)->then([](){
+        std::cout<<"here all tasks is done!"<<std::endl;
+    });
+    std::cout<<"world! "<<std::endl;
+    /** output is:
+    hello 
+    world! 
+    binary of 0 is: 00000000
+    binary of 1 is: 00000001
+    binary of 2 is: 00000010
+    binary of 3 is: 00000011
+    here, all tasks are done!
+    
+    **/
+```
 
 Full example is here
 ```C++
